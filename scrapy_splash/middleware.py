@@ -320,15 +320,15 @@ class SplashMiddleware(object):
 
         headers = Headers({'Content-Type': 'application/json'})
         headers.update(splash_options.get('splash_headers', {}))
-        new_request = request.replace(
-            url=splash_url,
-            method='POST',
-            body=body,
-            headers=headers,
-            priority=request.priority + self.rescheduling_priority_adjust
-        )
+
+        # Transmit the request to splash post request.
+        request._url = splash_url
+        request._body = body.encode('utf8')
+        request.method = 'POST'
+        request.headers = headers
+        request.priority=request.priority + self.rescheduling_priority_adjust
+
         self.crawler.stats.inc_value('splash/%s/request_count' % endpoint)
-        return new_request
 
     def process_response(self, request, response, spider):
         if not request.meta.get("_splash_processed"):
